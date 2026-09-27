@@ -15,7 +15,7 @@
 // resolves to the earlier frame; that's sub-frame and not worth snapping.
 //
 // Replacing the video:
-//   1. The source is `public/ARC(F1).mp4` (1920×1080, 24 fps, 38 MB with
+//   1. The source is `docs/references/source/ARC(F1).mp4` (1920×1080, 24 fps, 38 MB with
 //      audio) — never serve that file directly. The web copy is muted (sound
 //      can't start from a scroll anyway) and re-encoded:
 //        ffmpeg -i in.mp4 -an -c:v libx264 -preset slow -crf 27 \

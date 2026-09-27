@@ -1,0 +1,3 @@
+# Next's build assets are content-hashed, so they can be cached forever.
+/_next/static/*
+  Cache-Control: public,max-age=31536000,immutable

@@ -1,0 +1,29 @@
+// Cloudflare Workers config for the ARC site, deployed through OpenNext.
+// Committed (2026-09-27) so deploys no longer regenerate it on the build
+// machine. Build + deploy with `npm run deploy`.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "arc",
+	"compatibility_date": "2026-09-26",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			// Self-reference: the service name must match the worker name.
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "arc"
+		}
+	],
+	// Resizes next/image images per device. Without it the adapter serves
+	// the originals unresized, which also works.
+	"images": {
+		"binding": "IMAGES"
+	},
+	"observability": {
+		"enabled": true
+	}
+}

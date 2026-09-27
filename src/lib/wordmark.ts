@@ -1,6 +1,6 @@
 /**
  * The ARC logomark as stroke geometry, measured off the real logo file
- * (`public/ARC Logo.png`) rather than eyeballed.
+ * (`docs/references/brand/ARC Logo.png`) rather than eyeballed.
  *
  * The mark is thin geometric strokes, not a heavy typeface, and each letter is
  * defined as much by what's *missing* as by what's there:

@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Film master (38 MB, with audio). Kept locally as the source for
+# public/film/arc-f1.mp4 — too large for git and must never ship
+# (Cloudflare Workers rejects any asset over 25 MiB).
+docs/references/source/*.mp4
+
+# Cloudflare / OpenNext build output and local state
+.open-next
+.wrangler
+.dev.vars*
+!.dev.vars.example
