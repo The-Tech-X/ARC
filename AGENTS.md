@@ -121,7 +121,7 @@ Do not introduce a second animation library (GSAP, native CSS `animation-timelin
 ## Deployment (Cloudflare Workers via OpenNext, set up 2026-09-27)
 
 - **Config is committed:** `wrangler.jsonc` (worker `arc`, assets, the `IMAGES` binding for next/image resizing) and `open-next.config.ts`. It uses the **static-assets incremental cache**, which is right because every route is prerendered and nothing revalidates. Switch to the R2 cache only if ISR is ever added.
-- **Commands:** `npm run preview` builds and runs the worker locally in workerd, and `npm run deploy` builds and deploys. **Cloudflare Workers Builds must run the OpenNext build, not just `next build`.** Use build command `npx opennextjs-cloudflare build` and deploy command `npx wrangler deploy`.
+- **Commands:** `npm run build` is the **full Cloudflare build** (`opennextjs-cloudflare build`). OpenNext builds Next itself through `npm run build:next` (`buildCommand` in `open-next.config.ts`), because calling `npm run build` from inside it would recurse. So the Cloudflare dashboard's defaults (build `npm run build`, deploy `npx wrangler deploy`) work unchanged. The first deploy after the migration failed with "Could not find compiled Open Next config" because `build` was still plain `next build`. `npm run build:next` gives a plain Next build, `npm run preview` runs the worker locally in workerd, and `npm run deploy` builds and deploys from a laptop.
 - **Versions:** OpenNext 1.20.x needs `next >=16.3.3`, so the project is on 16.3.6. Keep Next and `eslint-config-next` on the same version, and don't drop below 16.3.3.
 - **`allowScripts` in package.json** approves the install scripts of `sharp`, `esbuild`, `workerd` and `unrs-resolver`. npm skips install scripts that aren't listed, and those packages need theirs. Re-approve with `npm approve-scripts <pkg>` after a version bump if npm warns again.
 - **Size limit:** Workers rejects any single asset over 25 MiB. The film master lives in `docs/references/source/` and is gitignored; never put it in `public/`.
@@ -345,7 +345,7 @@ Naming, already decided: **ARC** for logo/nav/headlines, **ARC Media** for `<tit
 No test runner exists in this project and it's a visual marketing site, so the check is:
 
 ```
-npx tsc --noEmit && npm run lint && npm run build
+npx tsc --noEmit && npm run lint && npm run build   # build = full Cloudflare build
 ```
 
 All three were clean as of 2026-09-03. Note `npm run lint` was **already failing** before that date (`CustomCursor.tsx`, `set-state-in-effect`); if it fails again, check whether it's your change or that class of rule.
