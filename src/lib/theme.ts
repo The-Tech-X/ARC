@@ -1,9 +1,9 @@
 export const theme = {
   colors: {
-    deepBlack: "#0a0a0a",
-    charcoal: "#1a1a1a",
-    ivory: "#f2f1ee",
-    gold: "#d4af37",
-    slateBlue: "#24303f",
+    deepBlack: "#0e0d0b",
+    charcoal: "#1b1917",
+    bone: "#f3f0ea",
+    signal: "#ff4d1f",
+    smoke: "#2a2622",
   },
 } as const;

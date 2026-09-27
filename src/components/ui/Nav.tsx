@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import GoldText from "./GoldText";
+import Link from "next/link";
+import Wordmark from "./Wordmark";
 import CTAButton from "./CTAButton";
 
 export default function Nav() {
@@ -18,15 +19,20 @@ export default function Nav() {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ${
         scrolled
-          ? "border-b border-ivory/10 bg-deep-black/70 backdrop-blur-md"
+          ? "border-b border-bone/10 bg-deep-black/90 backdrop-blur-md"
           : "bg-transparent"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 sm:px-10">
-        <a href="#hero" className="font-heading text-xl font-bold tracking-wide">
-          <GoldText>ARC</GoldText>
-        </a>
-        <CTAButton href="#book-a-call">Book a Call</CTAButton>
+        {/* Still deliberately no link menu — the visitor gets one way out of
+            the page and it's the CTA. About and legal live in the footer,
+            reached once they've been convinced rather than before. */}
+        {/* The real mark, not "ARC" set in Satoshi — this is the one place on
+            the page that has to be the logo itself. See src/lib/wordmark.ts. */}
+        <Link href="/" className="block transition-opacity duration-300 hover:opacity-70">
+          <Wordmark title="ARC — home" className="h-5 w-auto sm:h-6" />
+        </Link>
+        <CTAButton href="/book">Book a Call</CTAButton>
       </div>
     </header>
   );

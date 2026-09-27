@@ -10,6 +10,11 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    // scripts/ is run directly by Node, which strips the types rather than
+    // resolving them — so its imports have to carry the real .ts extension.
+    // Safe here because nothing is emitted; the bundler still resolves app
+    // code without extensions.
+    "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,

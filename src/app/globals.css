@@ -1,14 +1,20 @@
 @import "tailwindcss";
 
+/* The "Signal" system, chosen 2026-09-27 (see AGENTS.md → Visual identity).
+   Warm neutrals plus one accent: the camera's REC light. */
 @theme {
-  --color-deep-black: #0a0a0a;
-  --color-charcoal: #1a1a1a;
-  --color-ivory: #f2f1ee;
-  --color-gold: #d4af37;
-  --color-slate-blue: #24303f;
+  --color-deep-black: #0e0d0b;
+  --color-charcoal: #1b1917;
+  --color-smoke: #2a2622;
+  --color-stone: #8a857c;
+  --color-bone: #f3f0ea;
+  --color-signal: #ff4d1f;
+  /* The accent as text on bone — #ff4d1f is too light to read there. */
+  --color-signal-deep: #e63e12;
 
-  --font-heading: var(--font-satoshi);
-  --font-body: var(--font-manrope);
+  --font-heading: var(--font-archivo);
+  --font-body: var(--font-archivo);
+  --font-type: var(--font-special-elite);
 }
 
 html {
@@ -17,17 +23,47 @@ html {
 
 body {
   background-color: var(--color-deep-black);
-  color: var(--color-ivory);
-  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  color: var(--color-bone);
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Archivo is one family at two widths: squeezed tall for display, normal for
+   reading. `font-heading` only sets the family, so the width lives here. */
 h1,
 h2,
 h3,
 h4,
 h5,
-h6 {
-  font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+h6,
+.font-heading {
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  font-stretch: 62%;
+}
+
+/* Micro-interactions, shared (2026-09-27). All are driven by hover, press
+   or focus — never a timer — and the reduced-motion block below flattens
+   their transitions. */
+
+/* Keyboard focus: one visible, on-brand ring everywhere. The outline
+   follows each element's own border-radius. */
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 3px;
+}
+
+/* A link whose underline draws in from the left on hover and focus. */
+.link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition:
+    background-size 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.3s ease;
+}
+.link-draw:hover,
+.link-draw:focus-visible {
+  background-size: 100% 1px;
 }
 
 @media (pointer: fine) {
@@ -35,5 +71,26 @@ h6 {
   a,
   button {
     cursor: none;
+  }
+}
+
+/* Set by the inline script in layout.tsx before first paint, on repeat
+   visits and under reduced motion. Hiding the overlay in CSS rather than
+   waiting for React avoids a flash of black while hydration catches up. */
+html[data-intro-skip="1"] .arc-intro-overlay {
+  display: none !important;
+}
+
+/* Framer Motion is handled separately by MotionConfig reducedMotion="user"
+   in IntroProvider; this covers the CSS transitions and animations spread
+   across the components, which that can't reach. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
