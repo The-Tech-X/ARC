@@ -1,3 +1,13 @@
 # Next's build assets are content-hashed, so they can be cached forever.
 /_next/static/*
   Cache-Control: public,max-age=31536000,immutable
+
+# Media: not content-hashed, so a week with background revalidation rather
+# than forever. Without this the worker sent max-age=0 and every visit
+# re-validated the film.
+/film/*
+  Cache-Control: public,max-age=604800,stale-while-revalidate=86400
+/hero/*
+  Cache-Control: public,max-age=604800,stale-while-revalidate=86400
+/founder/*
+  Cache-Control: public,max-age=604800,stale-while-revalidate=86400

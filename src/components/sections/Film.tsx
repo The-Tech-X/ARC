@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import Highlight from "@/components/ui/Highlight";
 import { EASE_OUT } from "@/lib/motion";
+import { useFilmSource } from "@/lib/useFilmSource";
 import { FILM, type Callout, type CaptionPart, type FilmCaption } from "@/content/film";
 
 /**
@@ -108,6 +109,12 @@ export default function Film() {
   // cleanup the moment it was started.
   const holdTimer = useRef(0);
 
+  // The video, loaded whole into memory ahead of time (see useFilmSource),
+  // and whether the element has decoded its first frame from it. Nothing
+  // plays or seeks before that: the queue simply waits, with the poster up.
+  const { src, progress } = useFilmSource(sectionRef, FILM.src);
+  const [ready, setReady] = useState(false);
+
   const endHold = useCallback(() => {
     window.clearTimeout(holdTimer.current);
     setHolding(false);
@@ -138,7 +145,7 @@ export default function Film() {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !ready) return;
 
     let stopped = false;
     let raf = 0;
@@ -270,7 +277,7 @@ export default function Film() {
       video.removeEventListener("timeupdate", onTime);
       video.removeEventListener("ended", settle);
     };
-  }, [step, beat, holding, reduced, endHold]);
+  }, [step, beat, holding, reduced, endHold, ready]);
 
   const shown = Math.max(0, beat);
 
@@ -303,10 +310,12 @@ export default function Film() {
             frame's edges) so the crew roster fits above the readout. */}
         <video
           ref={videoRef}
-          src={FILM.src}
+          src={src ?? undefined}
+          poster={FILM.poster}
           muted
           playsInline
           preload="auto"
+          onLoadedData={() => setReady(true)}
           aria-hidden="true"
           className="aspect-video max-h-[30svh] w-full shrink-0 object-cover lg:absolute lg:inset-0 lg:aspect-auto lg:h-full lg:max-h-none"
           style={{
@@ -364,6 +373,21 @@ export default function Film() {
             means "you are here", as it does on the timeline's playhead. */}
         <div className="pointer-events-none lg:absolute lg:inset-x-0 lg:bottom-0">
           <div className="mx-auto flex max-w-6xl items-center justify-end gap-4 px-6 pt-4 sm:px-12 lg:px-20 lg:pt-0 lg:pb-12">
+            {/* Only if the reader arrives before the film has finished
+                loading (normally it's done while they're still in the Hero):
+                an honest progress line, in the readout's own voice. The film
+                waits on the poster meanwhile — nothing stalls mid-play. */}
+            {step >= 0 && !ready && (
+              <span role="status" className="flex items-center gap-3 font-body text-xs tabular-nums tracking-[0.2em] text-bone/50">
+                Loading film · {Math.round(progress * 100)}%
+                <span aria-hidden="true" className="relative h-px w-16 overflow-hidden bg-bone/15">
+                  <span
+                    className="absolute inset-y-0 left-0 bg-signal transition-[width] duration-300"
+                    style={{ width: `${Math.round(progress * 100)}%` }}
+                  />
+                </span>
+              </span>
+            )}
             <span className="font-body text-xs tabular-nums tracking-[0.2em] text-bone/40">
               {String(shown + 1).padStart(2, "0")} / {String(CLIPS).padStart(2, "0")}
             </span>

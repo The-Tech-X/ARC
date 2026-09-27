@@ -6,7 +6,7 @@ import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incre
 // served from Workers static assets, with no R2 bucket or KV to create.
 // If a page ever needs ISR/revalidation, switch to the R2 incremental cache
 // (https://opennext.js.org/cloudflare/caching).
-export default {
+const config = {
   ...defineCloudflareConfig({
     incrementalCache: staticAssetsIncrementalCache,
     enableCacheInterception: true,
@@ -17,3 +17,5 @@ export default {
   // "npm run build" + "npx wrangler deploy" work unchanged.
   buildCommand: "npm run build:next",
 };
+
+export default config;

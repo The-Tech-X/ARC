@@ -23,6 +23,8 @@
 //          -g 24 -keyint_min 24 -sc_threshold 0 \
 //          -force_key_frames "0,3,6.15,10.10,16.14" \
 //          -movflags +faststart public/film/arc-f1.mp4
+//      and the phone copy with `-vf scale=1280:-2 -crf 26 -level 4.0` into
+//      public/film/arc-f1-720.mp4; poster.webp is frame 0 at 1600px.
 //      `-force_key_frames` puts a keyframe at every cue so a seek back to a
 //      held frame lands instantly instead of decoding from the last GOP;
 //      update that list whenever `cues` changes.
@@ -124,7 +126,12 @@ export type FilmCaption = {
 };
 
 export const FILM = {
-  src: "/film/arc-f1.mp4",
+  // Two encodes of the same cut, same keyframes: 1080p for desktop, 720p for
+  // the phone band. Loaded whole into memory by useFilmSource (the worker
+  // doesn't serve byte ranges, so streaming seeks stalled). `poster` is frame
+  // 0, shown until the film is ready so the stage is never an empty box.
+  src: { desktop: "/film/arc-f1.mp4", mobile: "/film/arc-f1-720.mp4" },
+  poster: "/film/poster.webp",
   cues: [3, 6.15, 10.1, 16.14],
   captions: [
     {
