@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Highlight from "@/components/ui/Highlight";
 import CTAButton from "@/components/ui/CTAButton";
-import Mosaic from "@/components/ui/Mosaic";
+import Halftone from "@/components/ui/Halftone";
 
 export const metadata: Metadata = {
   title: "Not Found",
@@ -17,7 +17,7 @@ const SLATE = [
 export default function NotFound() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-deep-black px-6 py-40">
-      <Mosaic variant="tiles" />
+      <Halftone seed={11} spots={[{ x: 50, y: 50, rx: 60, ry: 60, strength: 0.8 }]} />
       <div className="relative w-full max-w-lg">
         {/* A slate, because that's what you're holding when a take doesn't
             get used. Static — a 404 is not the place for a performance. */}

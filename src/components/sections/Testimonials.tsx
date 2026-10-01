@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import Highlight from "@/components/ui/Highlight";
-import Mosaic from "@/components/ui/Mosaic";
 import Reveal from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { REVIEWS, type Review } from "@/content/testimonials";
@@ -74,9 +73,6 @@ export default function Testimonials() {
 
   return (
     <section id="testimonials" className="relative overflow-hidden bg-deep-black py-28 sm:py-36">
-      {/* Dot-mosaic behind the featured quote only; it fades before the cards. */}
-      <Mosaic variant="dots" seed={5} fade="radial-gradient(ellipse 60% 38% at 70% 30%, black 20%, transparent 80%)" />
-
       <div className="relative mx-auto max-w-6xl px-6 sm:px-12 lg:px-20">
         <SectionHeading eyebrow="Client reviews">
           Said better by <Highlight>them</Highlight>.

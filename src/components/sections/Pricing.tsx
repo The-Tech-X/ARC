@@ -6,7 +6,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
 import CTAButton from "@/components/ui/CTAButton";
 import { PLANS, type Plan } from "@/content/pricing";
-import Mosaic from "@/components/ui/Mosaic";
+import Halftone from "@/components/ui/Halftone";
 
 /**
  * Three plans, one of them lit. Pricing is the page's light "cut": a bone
@@ -112,8 +112,8 @@ function PlanCard({ plan }: { plan: Plan }) {
 export default function Pricing() {
   return (
     <section id="pricing" className="relative overflow-hidden bg-bone py-28 text-deep-black sm:py-36">
-      {/* Ink dot-mosaic on bone, top-right, clear of the plans. */}
-      <Mosaic variant="dots" tone="light" seed={6} fade="radial-gradient(ellipse 45% 40% at 85% 12%, black 20%, transparent 80%)" />
+      {/* Ink halftone on bone, top-right, clear of the plans. */}
+      <Halftone soft tone="light" seed={6} spots={[{ x: 88, y: 8, rx: 40, ry: 30 }]} />
       <div className="relative mx-auto max-w-6xl px-6 sm:px-12 lg:px-20">
         <SectionHeading eyebrow="Pricing" tone="light">
           Pick a <Highlight light>pace</Highlight>.

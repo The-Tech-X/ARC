@@ -51,6 +51,44 @@ export const ARC_WHY = {
   close: "That's ARC.",
 } as const;
 
+/**
+ * "Made for where it lands": the three phones in the second card, each showing
+ * a piece as it plays in that platform's own vertical player. Order is left to
+ * right, and the middle one is the featured frame (asked for by the user on
+ * 2026-10-01: YouTube left, Instagram centre, Facebook right).
+ *
+ * The stills are the Hero's STOCK mood images (Unsplash License, see
+ * `hero.ts`), and the accounts are **fictional brands**, not clients: nothing
+ * here claims ARC made these posts. Swap in real stills and real accounts
+ * (with permission) once there are some. Rules carried over from the rest of
+ * the page:
+ * - **No numbers in the players.** No like, view or comment counts. A count
+ *   on a mock post is an invented metric. The rails show icons and the labels
+ *   the apps use when counts are hidden ("Like", "Share").
+ * - Captions are pre-trimmed to one line, ending where the app would cut to
+ *   "… more". Keep them that short, or they'll run into the action rail.
+ */
+export const PLATFORM_FRAMES = [
+  {
+    platform: "youtube",
+    src: "/hero/run.webp",
+    account: "@pace.run",
+    caption: "5am. Nobody's watching.",
+  },
+  {
+    platform: "instagram",
+    src: "/hero/pour.webp",
+    account: "slowpour.coffee",
+    caption: "First pour of the day",
+  },
+  {
+    platform: "facebook",
+    src: "/hero/kitchen.webp",
+    account: "Ember Kitchen",
+    caption: "Ten minutes to service",
+  },
+] as const;
+
 export type AboutCard = {
   /** Ties the copy to its visual in `About.tsx`. */
   id: "hands" | "platform" | "calendar" | "tools";

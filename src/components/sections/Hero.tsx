@@ -6,7 +6,7 @@ import ArcOfStories from "@/components/ui/ArcOfStories";
 import CTAButton from "@/components/ui/CTAButton";
 import { useIntroDone } from "@/components/providers/IntroProvider";
 import { fadeUp, rackFocus, staggerContainer } from "@/lib/motion";
-import Mosaic from "@/components/ui/Mosaic";
+import Halftone from "@/components/ui/Halftone";
 
 const container = staggerContainer(0.15, 0.3);
 
@@ -52,17 +52,14 @@ export default function Hero() {
       id="hero"
       className="relative flex min-h-screen w-full flex-col overflow-hidden bg-deep-black"
     >
-      {/* The printed texture: a mottled tile grid across the section,
-          faded top and bottom so it never meets an edge, and a patch of
-          dot-mosaic behind the arc. See Mosaic.tsx. */}
-      <Mosaic
-        variant="tiles"
-        fade="linear-gradient(to bottom, transparent 0%, black 15%, black 70%, transparent 100%)"
-      />
-      <Mosaic
-        variant="dots"
+      {/* The printed texture: a dithered-halftone cloud behind the arc, and
+          a fainter one drifting in from the top-left. See Halftone.tsx. */}
+      <Halftone
         seed={2}
-        fade="radial-gradient(ellipse 45% 55% at 72% 48%, black 25%, transparent 75%)"
+        spots={[
+          { x: 72, y: 50, rx: 42, ry: 60 },
+          { x: 6, y: 4, rx: 34, ry: 40, strength: 0.6 },
+        ]}
       />
       <Vignette />
       <GrainOverlay />

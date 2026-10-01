@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import Highlight from "@/components/ui/Highlight";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
-import { ABOUT_CARDS, ABOUT_STORY, type AboutCard } from "@/content/about";
+import { ABOUT_CARDS, ABOUT_STORY, PLATFORM_FRAMES, type AboutCard } from "@/content/about";
+import { PLATFORM_LOGOS } from "@/lib/platformLogos";
 import ToolCarousel from "@/components/ui/ToolCarousel";
-import { ASCENT_MARK, ascentInkBox } from "@/lib/wordmark";
+import OneHandMark from "@/components/ui/OneHandMark";
 
 /**
  * About — a bento grid, first thing under the Hero.
@@ -35,26 +37,28 @@ import { ASCENT_MARK, ascentInkBox } from "@/lib/wordmark";
  * Cards enter once on scroll via `Reveal` and then hold. The one thing that
  * keeps moving is the toolkit carousel in the fourth card — a deliberate,
  * user-requested exception to the no-loops rule, documented in
- * `ToolCarousel.tsx`. It's also the only client component in here; the rest is
- * server-rendered.
+ * `ToolCarousel.tsx`. The first card's mark (`OneHandMark.tsx`) also plays a
+ * one-time entrance of its own when it scrolls in, then holds.
  */
 
 /**
  * `box` is the visual well above each card's text. Three cards use a fixed
- * height; the carousel uses its own aspect instead, because its drawing is
+ * height (the first row's a step taller, for the phones); the carousel uses its own aspect instead, because its drawing is
  * anchored to the top of the frame (the beam has to enter at the card's edge)
  * and a fixed height would leave a dead band of black underneath it at narrow
  * widths. Costs a small difference in where the text starts between the two
  * cards in a row, which is invisible in a bento of unequal cards.
  */
 const VISUAL_BOX = "h-56 sm:h-64";
+/** The first row's well, a step taller so the phones are big enough to read. */
+const PHONE_BOX = "h-64 sm:h-72";
 
 const CARD_LAYOUT: Record<
   AboutCard["id"],
   { span: string; visual: ReactNode; box?: string }
 > = {
-  hands: { span: "lg:col-span-2", visual: <OneHandVisual /> },
-  platform: { span: "lg:col-span-3", visual: <PlatformVisual /> },
+  hands: { span: "lg:col-span-2", visual: <OneHandMark />, box: PHONE_BOX },
+  platform: { span: "lg:col-span-3", visual: <PlatformVisual />, box: PHONE_BOX },
   calendar: { span: "lg:col-span-3", visual: <CalendarVisual /> },
   tools: { span: "lg:col-span-2", visual: <ToolCarousel />, box: "aspect-[2/1]" },
 };
@@ -115,123 +119,335 @@ export default function About() {
 
 /* ------------------------------------------------------------------ visuals */
 
-const HAIRLINE = "rgba(243,240,234,0.14)";
 
 /**
- * One hand, end to end — the mark on a tile, lit from above, with the four
- * stages threading through it on a single unbroken line. The line is
- * deliberately one path: it's the same "nothing is handed off" idea the card's
- * copy makes.
+ * Made for where it lands — three phones, each playing a piece in that
+ * platform's own vertical player: YouTube Shorts, Instagram Reels (forward)
+ * and Facebook Reels. Vertical because that is the shape the work actually is.
+ *
+ * Each player's chrome is an SVG in a 180×320 (9:16) space laid over the
+ * still, so it scales with the phone and the icons stay put at every width.
+ * The layouts follow the apps as they look in 2026 — the action rail down the
+ * right, account and caption bottom-left, the audio tile at the foot of the
+ * rail — in each app's own vocabulary: YouTube's filled icons with "Like" /
+ * "Dislike" / "Share" / "Remix" labels and a Subscribe pill, Instagram's
+ * outlined heart / comment / repost / send with a Follow outline, Facebook's
+ * page name with "· Follow". Set in the system face, as the apps are. Data
+ * (stills, accounts, captions) is `PLATFORM_FRAMES` in `about.ts`, which
+ * carries the rules: stock stills, fictional accounts, and no counts.
+ *
+ * Accent: Instagram's progress bar, how far in the viewer still is. The other
+ * two players' bars stay bone, including YouTube's, which is red in the app.
  */
-function OneHandVisual() {
-  const a = ascentInkBox();
+const PHONE_SIZE = {
+  featured: "h-48 sm:h-60",
+  side: "h-40 sm:h-52",
+};
+
+function PlatformVisual() {
   return (
-    <svg viewBox="0 0 420 224" className="h-full w-full" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="about-beam" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ff8a5c" stopOpacity="0" />
-          <stop offset="100%" stopColor="#ff8a5c" stopOpacity="0.22" />
-        </linearGradient>
-        <linearGradient id="about-tile" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#2a2622" />
-          <stop offset="100%" stopColor="#151311" />
-        </linearGradient>
-        <radialGradient id="about-tile-glow">
-          <stop offset="0%" stopColor="#ff8a5c" stopOpacity="0.16" />
-          <stop offset="100%" stopColor="#ff8a5c" stopOpacity="0" />
-        </radialGradient>
-      </defs>
+    <div className="flex h-full items-center justify-center gap-3 px-4 sm:gap-5">
+      {PLATFORM_FRAMES.map((frame) => {
+        const featured = frame.platform === "instagram";
+        const logo = PLATFORM_LOGOS[frame.platform];
+        return (
+          <figure key={frame.platform} className="flex flex-col items-center gap-2.5">
+            <div
+              className={`relative ${featured ? PHONE_SIZE.featured : PHONE_SIZE.side} aspect-[9/16] overflow-hidden rounded-[14px] bg-black shadow-[0_14px_30px_-12px_rgba(0,0,0,0.8)] ring-1 ${
+                featured ? "ring-bone/20" : "ring-bone/10"
+              }`}
+            >
+              <Image
+                src={frame.src}
+                alt=""
+                fill
+                sizes="(min-width: 640px) 136px, 108px"
+                className="object-cover"
+              />
+              {/* the sides sit back: dimmer, not smaller-and-faded */}
+              {!featured && <span className="absolute inset-0 bg-black/30" />}
+              <PlayerChrome frame={frame} />
+            </div>
+            <figcaption className="flex items-center gap-1.5 whitespace-nowrap font-body text-[10px] tracking-wide text-bone/50 sm:text-[11px]">
+              <svg viewBox="0 0 24 24" className="h-3 w-3 shrink-0" aria-hidden="true">
+                <path d={logo.d} fill="rgba(243,240,234,0.6)" />
+              </svg>
+              {logo.label}
+            </figcaption>
+          </figure>
+        );
+      })}
+    </div>
+  );
+}
 
-      {/* the light the tile sits under */}
-      <rect x="196" y="0" width="28" height="96" fill="url(#about-beam)" />
-      <circle cx="210" cy="118" r="86" fill="url(#about-tile-glow)" />
+const UI_FONT = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif";
+const WHITE = "#ffffff";
 
-      {/* One line, in and out of the tile. It meets the tile's *edges*, not
-          its corners — through a corner it reads as two unrelated lines that
-          happen to end near a box. */}
-      <path
-        d="M 24 96 H 96 V 130 H 168 M 252 106 H 324 V 140 H 396"
-        stroke={HAIRLINE}
-        strokeWidth="1"
-      />
-      {[
-        [24, 96],
-        [96, 130],
-        [324, 106],
-        [396, 140],
-      ].map(([cx, cy]) => (
-        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="3" fill="rgba(243,240,234,0.3)" />
-      ))}
-
-      <rect
-        x="168"
-        y="76"
-        width="84"
-        height="84"
-        rx="22"
-        fill="url(#about-tile)"
-        stroke="rgba(255,77,31,0.35)"
-      />
-      <svg x="192" y="98" width="36" height="40" viewBox={`${a.x} ${a.y} ${a.w} ${a.h}`}>
-        <path
-          d={ASCENT_MARK}
-          fill="none"
-          stroke="#ff4d1f"
-          strokeWidth="12"
-          strokeLinejoin="miter"
-        />
-      </svg>
+/** A 24-grid icon placed in the 180×320 player space, centred on (cx, cy). */
+function Glyph({
+  cx,
+  cy,
+  size = 15,
+  filled = false,
+  children,
+}: {
+  cx: number;
+  cy: number;
+  size?: number;
+  filled?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <svg x={cx - size / 2} y={cy - size / 2} width={size} height={size} viewBox="0 0 24 24">
+      <g
+        fill={filled ? WHITE : "none"}
+        stroke={filled ? "none" : WHITE}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {children}
+      </g>
     </svg>
   );
 }
 
-/**
- * Made for where it lands — three 9:16 frames, the middle one forward and
- * mid-scrub. Vertical because that is the shape the work actually is; a
- * landscape mock here would contradict the sentence underneath it.
- */
-function PlatformVisual() {
+function Label({
+  x,
+  y,
+  size = 6,
+  weight = 400,
+  opacity = 1,
+  anchor = "start",
+  children,
+}: {
+  x: number;
+  y: number;
+  size?: number;
+  weight?: number;
+  opacity?: number;
+  anchor?: "start" | "middle" | "end";
+  children: ReactNode;
+}) {
   return (
-    <div className="flex h-full items-center justify-center gap-4 px-6">
-      {[
-        // The light in each frame sits somewhere different, so three empty
-        // frames read as three different shots rather than as one asset
-        // repeated. Without real footage this is the only thing carrying that.
-        { h: "h-32 sm:h-36", featured: false, glow: "70% 30%" },
-        { h: "h-40 sm:h-48", featured: true, glow: "35% 25%" },
-        { h: "h-32 sm:h-36", featured: false, glow: "45% 75%" },
-      ].map(({ h, featured, glow }, i) => (
-        <div
-          key={i}
-          className={`relative ${h} aspect-[9/16] overflow-hidden rounded-xl border ${
-            featured ? "border-bone/15" : "border-bone/10 opacity-75"
-          } bg-gradient-to-br from-bone/[0.09] via-transparent to-bone/[0.03]`}
-        >
-          <span
-            className="absolute inset-0"
-            style={{
-              background: `radial-gradient(110% 70% at ${glow}, rgba(243,240,234,0.13), transparent 62%)`,
-            }}
-          />
-          {featured && (
-            <>
-              {/* play affordance — outline only, so it reads as a frame of
-                  video rather than as a button someone might try to press */}
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                  <circle cx="11" cy="11" r="10" stroke="rgba(243,240,234,0.35)" />
-                  <path d="M9 7.5 L15 11 L9 14.5 Z" fill="rgba(243,240,234,0.55)" />
-                </svg>
-              </span>
-              {/* the one accent element: how far in the viewer still is */}
-              <span className="absolute inset-x-2.5 bottom-2.5 h-[3px] overflow-hidden rounded-full bg-bone/15">
-                <span className="block h-full w-[62%] rounded-full bg-signal" />
-              </span>
-            </>
-          )}
-        </div>
+    <text
+      x={x}
+      y={y}
+      fill={WHITE}
+      fillOpacity={opacity}
+      fontSize={size}
+      fontWeight={weight}
+      textAnchor={anchor}
+      fontFamily={UI_FONT}
+    >
+      {children}
+    </text>
+  );
+}
+
+const ICON = {
+  heart: <path d="M12 20s-7.5-4.4-7.5-10.1A4.2 4.2 0 0 1 12 7.4a4.2 4.2 0 0 1 7.5 2.5C19.5 15.6 12 20 12 20z" />,
+  bubble: <path d="M12 3.5a8.5 8.5 0 0 0-7.5 12.5L3.5 20.5l4.6-1A8.5 8.5 0 1 0 12 3.5z" />,
+  repost: <path d="M4 11.5V9.5a2.5 2.5 0 0 1 2.5-2.5H19M16 4l3 3-3 3M20 12.5v2a2.5 2.5 0 0 1-2.5 2.5H5M8 20l-3-3 3-3" />,
+  send: <path d="M21 3 10.5 13.5M21 3l-6.5 18-4-7.5-7.5-4z" />,
+  thumbUp: <path d="M2.5 10h4v10.5h-4zM8 20.5V10l3.8-7.2a2 2 0 0 1 3.5 1.6L14.2 9h5.3a2 2 0 0 1 2 2.4l-1.6 7.7a1.8 1.8 0 0 1-1.8 1.4z" />,
+  thumbOutline: <path d="M7 10v10.5H3.5V10zM7 10l4-7a2 2 0 0 1 3.6 1.5L13.8 9h5.6a2 2 0 0 1 2 2.4l-1.5 7.5a2 2 0 0 1-2 1.6H7" />,
+  ytBubble: <path d="M4 3.5h16a1.5 1.5 0 0 1 1.5 1.5v11a1.5 1.5 0 0 1-1.5 1.5H8l-4.5 3.8V5A1.5 1.5 0 0 1 4 3.5z" />,
+  ytShare: <path d="M13.5 4.5 22 12l-8.5 7.5V15c-5.4 0-8.8 1.6-11.5 5.2C3 14.6 6.4 10 13.5 9.2z" />,
+  fbShare: <path d="M13.5 5 21 12l-7.5 7v-4C8 15 4.8 16.6 3 19.5 3.6 13.8 7 10 13.5 9.2z" />,
+  remix: <path d="M8.5 5.5a6.5 6.5 0 0 0 0 13M15.5 5.5a6.5 6.5 0 0 1 0 13M12 4v16" />,
+  search: <path d="M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM15.5 15.5 20.5 20.5" />,
+  camera: <path d="M3.5 8.5A2 2 0 0 1 5.5 6.5h2.2L9.2 4.5h5.6l1.5 2h2.2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2zM12 9.3a3.7 3.7 0 1 0 0 7.4 3.7 3.7 0 0 0 0-7.4z" />,
+  chevronDown: <path d="M7 10l5 5 5-5" />,
+  note: <path d="M9 18V5.5l10-2V16M9 18a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0zM19 16a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />,
+};
+
+function Dots({ cx, cy, vertical = false }: { cx: number; cy: number; vertical?: boolean }) {
+  return (
+    <g fill={WHITE}>
+      {[-4.5, 0, 4.5].map((d) => (
+        <circle key={d} cx={vertical ? cx : cx + d} cy={vertical ? cy + d : cy} r="1.3" />
       ))}
-    </div>
+    </g>
+  );
+}
+
+/** The account's avatar: a ringed disc with the account's initial. */
+function Avatar({ cx, cy, letter }: { cx: number; cy: number; letter: string }) {
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r="8" fill="#3a332c" stroke={WHITE} strokeOpacity="0.85" strokeWidth="0.8" />
+      <Label x={cx} y={cy + 2.6} size={7.5} weight={700} anchor="middle">
+        {letter}
+      </Label>
+    </g>
+  );
+}
+
+/** The spinning-record / audio tile at the foot of the rail, held still. */
+function AudioTile({ cx, cy }: { cx: number; cy: number }) {
+  return (
+    <g>
+      <rect x={cx - 8} y={cy - 8} width="16" height="16" rx="3.5" fill="#2a2622" stroke={WHITE} strokeWidth="1.2" />
+      <Glyph cx={cx} cy={cy} size={9}>
+        {ICON.note}
+      </Glyph>
+    </g>
+  );
+}
+
+type Frame = (typeof PLATFORM_FRAMES)[number];
+
+function PlayerChrome({ frame }: { frame: Frame }) {
+  const { platform, account, caption } = frame;
+  const initial = account.replace("@", "").charAt(0).toUpperCase();
+  return (
+    <svg viewBox="0 0 180 320" className="absolute inset-0 h-full w-full" aria-hidden="true">
+      <defs>
+        {/* the scrims every player lays over the video so its chrome reads */}
+        <linearGradient id={`scrim-${platform}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#000" stopOpacity="0.45" />
+          <stop offset="14%" stopColor="#000" stopOpacity="0" />
+          <stop offset="62%" stopColor="#000" stopOpacity="0" />
+          <stop offset="100%" stopColor="#000" stopOpacity="0.7" />
+        </linearGradient>
+      </defs>
+      <rect width="180" height="320" fill={`url(#scrim-${platform})`} />
+
+      {platform === "youtube" && (
+        <>
+          <Glyph cx={138} cy={20} size={13}>
+            {ICON.search}
+          </Glyph>
+          <Dots cx={162} cy={20} vertical />
+
+          {/* rail */}
+          <Glyph cx={161} cy={150} filled>
+            {ICON.thumbUp}
+          </Glyph>
+          <Label x={161} y={168} size={5.5} anchor="middle">Like</Label>
+          <g transform="rotate(180 161 186)">
+            <Glyph cx={161} cy={186} filled>
+              {ICON.thumbUp}
+            </Glyph>
+          </g>
+          <Label x={161} y={204} size={5.5} anchor="middle">Dislike</Label>
+          <Glyph cx={161} cy={223} filled>
+            {ICON.ytBubble}
+          </Glyph>
+          <Glyph cx={161} cy={250} filled>
+            {ICON.ytShare}
+          </Glyph>
+          <Label x={161} y={268} size={5.5} anchor="middle">Share</Label>
+          <Glyph cx={161} cy={282} size={13}>
+            {ICON.remix}
+          </Glyph>
+          <AudioTile cx={161} cy={302} />
+
+          {/* account, then the title under it, as Shorts sets them */}
+          <Avatar cx={18} cy={277} letter={initial} />
+          <Label x={30} y={279.5} size={6.8} weight={600}>{account}</Label>
+          <rect x="78" y="270.5" width="36" height="13" rx="6.5" fill={WHITE} />
+          <text x="96" y="279.3" fill="#0f0f0f" fontSize="6" fontWeight={600} textAnchor="middle" fontFamily={UI_FONT}>
+            Subscribe
+          </text>
+          <Label x={10} y={299} size={6.8}>{caption}</Label>
+
+          <rect x="0" y="317.5" width="180" height="2.5" fill={WHITE} fillOpacity="0.25" />
+          <rect x="0" y="317.5" width="74" height="2.5" fill={WHITE} fillOpacity="0.85" />
+        </>
+      )}
+
+      {platform === "instagram" && (
+        <>
+          <Label x={10} y={23} size={10} weight={700}>Reels</Label>
+          <Glyph cx={48} cy={20} size={10}>
+            {ICON.chevronDown}
+          </Glyph>
+          <Glyph cx={164} cy={20} size={14}>
+            {ICON.camera}
+          </Glyph>
+
+          {/* rail */}
+          <Glyph cx={162} cy={178} size={16}>
+            {ICON.heart}
+          </Glyph>
+          <Glyph cx={162} cy={204} size={15}>
+            {ICON.bubble}
+          </Glyph>
+          <Glyph cx={162} cy={230} size={15}>
+            {ICON.repost}
+          </Glyph>
+          <Glyph cx={162} cy={256} size={14}>
+            {ICON.send}
+          </Glyph>
+          <Dots cx={162} cy={278} />
+          <AudioTile cx={162} cy={299} />
+
+          <Avatar cx={18} cy={264} letter={initial} />
+          <Label x={30} y={266.5} size={6.8} weight={600}>{account}</Label>
+          <rect x="89" y="258.5" width="28" height="12" rx="3.5" fill="none" stroke={WHITE} strokeOpacity="0.85" strokeWidth="0.8" />
+          <Label x={103} y={266.6} size={5.8} weight={600} anchor="middle">Follow</Label>
+          <Label x={10} y={286} size={6.5}>
+            {caption}
+            <tspan fillOpacity="0.7">… more</tspan>
+          </Label>
+          <Glyph cx={13} cy={299} size={7}>
+            {ICON.note}
+          </Glyph>
+          <Label x={19} y={301.2} size={5.8} opacity={0.9}>{account} · Original audio</Label>
+
+          {/* the one accent: how far in the viewer still is */}
+          <rect x="0" y="317.5" width="180" height="2.5" fill={WHITE} fillOpacity="0.25" />
+          <rect x="0" y="317.5" width="112" height="2.5" fill="#ff4d1f" />
+        </>
+      )}
+
+      {platform === "facebook" && (
+        <>
+          <Label x={10} y={23} size={10} weight={700}>Reels</Label>
+          <Glyph cx={140} cy={20} size={13}>
+            {ICON.search}
+          </Glyph>
+          <Glyph cx={163} cy={20} size={14}>
+            {ICON.camera}
+          </Glyph>
+
+          {/* rail */}
+          <Glyph cx={162} cy={186} size={15}>
+            {ICON.thumbOutline}
+          </Glyph>
+          <Glyph cx={162} cy={212} size={15}>
+            {ICON.bubble}
+          </Glyph>
+          <Glyph cx={162} cy={238} size={15}>
+            {ICON.fbShare}
+          </Glyph>
+          <Dots cx={162} cy={262} />
+          <AudioTile cx={162} cy={286} />
+
+          {/* Facebook shows the page's name, not a handle, with a text Follow */}
+          <Avatar cx={18} cy={264} letter={initial} />
+          <Label x={30} y={266.5} size={6.8} weight={600}>
+            {account}
+            <tspan fontWeight={400}> · </tspan>
+            <tspan>Follow</tspan>
+          </Label>
+          <Label x={10} y={286} size={6.5}>
+            {caption}
+            <tspan fillOpacity="0.7">… See more</tspan>
+          </Label>
+          <Glyph cx={13} cy={299} size={7}>
+            {ICON.note}
+          </Glyph>
+          <Label x={19} y={301.2} size={5.8} opacity={0.9}>{account} · Original audio</Label>
+
+          <rect x="0" y="317.5" width="180" height="2.5" fill={WHITE} fillOpacity="0.25" />
+          <rect x="0" y="317.5" width="52" height="2.5" fill={WHITE} fillOpacity="0.85" />
+        </>
+      )}
+    </svg>
   );
 }
 

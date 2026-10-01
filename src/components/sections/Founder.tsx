@@ -6,13 +6,13 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
 import FilmFrame from "@/components/ui/FilmFrame";
 import { founder } from "@/content/site";
-import Mosaic from "@/components/ui/Mosaic";
+import Halftone from "@/components/ui/Halftone";
 
 export default function Founder() {
   return (
     <section id="founder" className="relative overflow-hidden bg-charcoal py-28 sm:py-36">
-      {/* Dot-mosaic behind the portrait frame: texture the frame sits on. */}
-      <Mosaic variant="dots" seed={4} fade="radial-gradient(ellipse 40% 55% at 25% 62%, black 20%, transparent 80%)" />
+      {/* Halftone behind the portrait frame: texture the frame sits on. */}
+      <Halftone seed={4} spots={[{ x: 25, y: 62, rx: 36, ry: 50 }]} />
       <div className="relative mx-auto max-w-6xl px-6 sm:px-12 lg:px-20">
         <SectionHeading eyebrow="The Founder">
           Behind <Highlight>ARC</Highlight>.
